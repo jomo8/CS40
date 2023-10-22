@@ -1,0 +1,142 @@
+/*
+*     README 
+*   Joseph Montalto (jmonta04) and Manpreet Kaur (mkaur08)
+*   CS40 HW 6: um 
+*   readme file for documentation 
+*/
+
+Acknowledgments:
+All help on designing, implementation, and debugging was done by the 
+TA staff. In terms of main.c and File I/O, it was done similarly to the 
+the filesofpix File I/O solution  within restoration architecture. 
+Bitpacking was also done by the solution provided from arith.
+
+Correctly Implemented: 
+The memory allocation where the segment memory of sequences is being freed.
+The file I/O is being correctly implemented along with the reading input 
+and output of a file, opening and closing a file. Segments are being 
+correctly accessed.
+
+Some test cases and operations work on implementation, such as addition, 
+multiplication, division, segment-load, conditional-move, hello, cat, 
+load program. 
+
+Incorrectly Implemented: 
+There is some functionality where it is core dumping, such as segment-store, 
+midmark, and sandbox, anything that is a larger set file seems to be 
+core-dumping and is not working correctly in terms of running what 
+it needs to. Everything is core dumping and not all functionality is optimal. 
+
+Changes from Design:
+Initially, the design also had a C Array which was used to keep track of 
+registers from 0 to 7. However, this changed within the final implementation
+because just like segments, registers were also represented a sequence. 
+
+There are no other signficant departures from the initial design, as 
+segments were always planned to be within a 2D sequence structure. 
+
+Architecture: 
+Modules are based on Memory. There is the segmented memory, then a Driver
+file which handles Registers/Instructions
+and performs all the operations, and then there is a main which is just
+initializing and starting the program. 
+
+Segment.c/Segment.h (Memory Module): In terms of location, this actually 
+stores the zero segment, which contains the words of the program. It is also 
+the start of the program as well as storing the program within segments. 
+The zero segment is defined to make sure that instructions are 
+being retrieved. This is also where the destructor and cleaning all the 
+memory occurs within the program. 
+Abstractions implemented: storing program, mapping and unmapping, initializing
+segments. 
+Secrets known: The struct, which holds the segmentData and the 
+unmapped segment which is used within getting the registers and storing 
+the entire program data. The implementation of storing the segments is done 
+within a 2D sequence structure. 
+
+Registers.c/Registers.h (Driver Module): In terms of the program, this is
+where every instruction is being read, meaning every register operation is 
+being handled to the correspinding operation. There is interaction
+between the Memory Module and the Driver Module in terms of the interaction
+of segments and registers. 
+Secrets known: Registers are held within a Sequence and there is 
+a struct, which contains the program counter that would allow the program 
+to go to the next word. This also holds the sequence for the registers 
+themselves as well. 
+
+Relation to one another: To be able to access starting the program and creating
+the registers, there needs to be access to the segments, memory module, 
+which allows the interaction to also occur with the creation and destruction
+of the program, which is where memory is being freed. 
+
+UM Time: 
+To run 50 million instructions, this program takes no time because 
+larger .um files seem to abort and core dump in general. 
+
+UM Unit Tests: 
+halt.um: This is testing the halt operation based on opcode 7 where the
+computation stops. It is specifically just appending the sequence stream
+and calling halt, which it takes no output, meaning it should print nothing
+on the reference implementation and the ./um implementation. 
+
+halt-verbose.um: This is an extension of testing halt, where it is outputting
+nothing if it is working, as it should just be stopping the computation.
+If it is not stopping, then it is printing 'Bad!' as output because of 
+the loading of values if halt is not working. 
+
+conditional-move.um: Conditional move tests to see if the operation of 
+opcode 0 is if r[C] does not equal 0 then r[A] = r[B]. This test is done 
+by loading the ASCII values of 53 and 1 and should output 55 within the
+./um and um reference. 
+
+add.um: Add tests to see if the operation at r[C] gets r[A] + r[B] based on
+opcode 3. This is done by loading the ASCII values of 48 and 2 within 
+the registers, which outputs 2. 
+
+print-six.um: This is another test which tests the add functionality and 
+makes sure 6 is being outputted by loading the values into r1 and r2.       
+
+segment-load.um: This is testing for the operation at opcode 1, where r[A]
+gets r[B]r[C] and is expected to output Z@ based on the registers loading
+values into r1 and r2. 
+
+segment-store.um: This is testing for the operation at opcode 2 where r[C]
+gets r[A]r[B] and should be expected to output the ASCII F as it is just 
+loading values into r1, r2, and r3. (This functionality has been causing
+many core dumps and segmentation faults.)
+
+map-segment.um: This is checking if a segment is being mapped by the operation
+with opcode 8. It is creating a new segment with the number of words within 
+r[C]. This is outputting the ASCII character at 100 by loading values into 
+r4 and r6. 
+
+multiplication.um: This is checking if operation at opcode 4 is working where
+r[A] gets r[B]*r[C]. This is outputting the ASCII at 100 by loading values 
+into r1, r2. 
+
+division.um: This is checking if operation at opcode 5 is working where
+r[A] gets r[B]/r[C]. This is outputting the ASCII at 252 by loading values 
+into r1, r2. 
+
+bitwiseNAND.um: This is checking if operation at opcode 6 is working where
+r[A] gets negating r[B] and r[C]. 
+This is outputting the ASCII at 61 by loading values into r1, r2. 
+
+load-program.um: This is checking if the segment at m[r[b]r[c]] is duplicated
+and the duplicate replaces m[0], which this is testing to output the word
+'Good!' if implemented correctly. 
+
+cat.um: Using echo, this should be running the words Hello, World! onto the
+command line as indicated by the functionality provided. 
+
+hello.um: This just prints a simple Hello, World message onto the command 
+line. 
+
+Time Spent Analyzing Assignment: 
+It took 5 hours. 
+
+Time Spent Preparing Design: 
+It took 10 hours. 
+
+Time Spent Solving Problems After Analysis: 
+It took 40 hours. 

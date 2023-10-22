@@ -1,0 +1,54 @@
+OVERVIEW:
+    Jack Berg (jberg02)
+    Joseph Montalto (jmonta04)
+
+    Bomb: #70
+    Acknowledgements: We would like to thank all the TAs for help. A special
+    thanks to Kresten,
+    Time spent: 
+
+
+Phase 1: 
+    The function reads a string through stdin and compares the string with one
+    that's hardcoded to read "But it is a sacrifice necessary to win the war." The strings must 
+    match, or the bomb will explode. 
+
+Phase 2:
+    Checks if an integer array of size 6 is symmetrical, excluding the case of all 0s. 
+
+Phase 3:
+    This phase requires that two integer values are inputted, otherwise the 
+    bomb will explode. Similar to a key-value pair in a hash table, this phase 
+    uses arguement one to calculate a unique return value. Then our second 
+    argument is compared with the return value and if equal defuses the bomb. 
+
+Phase 4:
+    This phase uses recursion to perform operations on an input integer. 
+    Recursively, the function multiplies the input n by 8 - (n-1), until the 
+    base case of 0. Once the base case is reached, the recursive helper function
+    returns the final value, which is compared to 343. If the value == 343, then
+    phase_4 returns successfully, otherwise explode_bomb is called.
+
+int func4(int x) {
+    if (x <= 0) {
+      return 1;
+    } else {
+      int temp = func4(x - 1);
+      return temp * 8 - x;
+    }
+}
+
+Phase 5: 
+The function takes in a 6 char string and performs bitwise operations on each
+character to produce a new string that is ultimately compared to the string 
+"titans". The bomb is defused if our input string can be converted to match the 
+string "titans". More specifically, the program takes 4 bits from the input 
+string and uses that value to map to a reference string "isrveawhobpnutfg" 
+stored at a specific address 0x401dd0. We determined that the input string 
+"m`meka" would be converted to the string "titans" which is what we were 
+looking for to defuse the bomb.
+
+Phase 6: 
+Sorts a linked list of integers from greatest to least and compares our input 
+to the 4th node in the sorted linked list.  
+

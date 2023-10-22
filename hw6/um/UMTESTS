@@ -1,0 +1,14 @@
+halt.um
+halt-verbose.um
+conditional-move.um
+add.um
+print-six.um  
+segment-load.um
+segment-store.um
+map-segment.um 
+multiplication.um
+division.um
+bitwiseNAND.um
+load-program.um 
+cat.um
+hello.um
