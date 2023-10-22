@@ -1,0 +1,381 @@
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#                                                                     #
+# Authors: Theodore Schneider (tschne02) and Joey Montalto (jmonta04) #
+#                                                                     #
+# Purpose: Contains implementaton of Reverse Polish Notation          #
+#          calculator functions                                       #
+#                                                                     #
+# Conventions:                                                        #
+#     r0 contains 0                                                   #
+#     r1 used for return adressed                                     #
+#     r6, r7 used as temporaries                                      #
+#     r2 used for call stack pointer                                  #
+#     r5 used for value stack pointer                                 #
+#     r3, r4 a preserved through function calls expected to return    #
+#     to where it was called from (i.e. goto ... linking ...)         #
+#                                                                     #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+
+# Conventions:
+#     r0 contains 0
+#     r1 used for return adressed
+#     r6, r7 used as temporaries
+#     r2 used for call stack pointer
+#     r5 used for value stack pointer
+#     r3, r4 a preserved through function calls expected to return to where
+#     it was called from (i.e. goto ... linking ...)
+
+.section init
+    .zero r0
+    .temps r6, r7
+    r0 := 0
+
+.section rodata
+    jumptable: 
+        .space 256
+
+
+.section init
+    r1 := 0
+    
+    # initjumptable initializes all space in the jumptable to hold the 
+    # input_error function. Register r1 is used as a loop counter.
+    initjumptable:
+        if (r1 >=s 256) goto initNums using r3
+        r4 := jumptable + r1
+        m[r0][r4] := input_error
+        r1 := r1 + 1
+        goto initjumptable
+    
+    
+    # Sets the offsets in the jumptable for digits to 
+    # be set to the digit label 
+    initNums:
+        r1 := 48
+        initLoop:
+            if (r1 >=s 58) goto initOps using r3
+            r4 := jumptable + r1
+            m[r0][r4] := digit
+            r1 := r1 + 1
+            goto initLoop
+
+    # Initialize all other operators within the 
+    # jumptable based on their offset
+    initOps:
+        m[r0][jumptable + ' '] := waiting
+        m[r0][jumptable + '\n'] := newl
+        m[r0][jumptable + '+'] := add
+        m[r0][jumptable + '-'] := sub
+        m[r0][jumptable + '*'] := mul
+        m[r0][jumptable + '/'] := div
+        m[r0][jumptable + '|'] := or
+        m[r0][jumptable + '&'] := and
+        m[r0][jumptable + 'c'] := sign
+        m[r0][jumptable + '~'] := not
+        m[r0][jumptable + 's'] := swap
+        m[r0][jumptable + 'd'] := dup
+        m[r0][jumptable + 'p'] := pop1
+        m[r0][jumptable + 'z'] := zero
+        
+# Contains all functions for reading chars and calling their respective 
+# operators
+.section text
+    # Begin the calling convention for registers r1 r4 r3 and jump 
+    # to the waiting state
+    main:
+        push r1 on stack r2
+        push r4 on stack r2
+        push r3 on stack r2
+        goto waiting 
+
+    # Outputs in the case of an invalid operator and transitions to 
+    # waiting state
+    input_error:
+        output "Unknown character '"
+        output r1
+        output "'\n"
+        goto waiting
+        
+
+    # Prints out the entire value stack pointed to by r5
+    # r4 used as an index counter for a loop
+    # r3 used to store the value of an element on the value stack
+    newl: 
+        r4 := 0
+        newlLoop:
+            r1 := r5 + r4   # get offset of val on value stack
+
+            if (r1 == endvalstack) goto waiting using r3 # stack fully printed
+            r3 := m[r0][r1]
+            output ">>> "
+            push r3 on stack r2 # put val on call stack for printd
+            goto printd linking r1
+            output "\n"
+            r4 := r4 + 1
+            goto newlLoop
+
+    # Push a digit in register r1 onto the value stack r5
+    digit:
+        r1 := r1 - 48
+        push r1 on stack r5
+        goto entering
+    
+    # Performs addition on the top two numbers in the value stack r5
+    # r3 and r4 hold the value of the addends
+    # r4 holds result of addition
+    add:
+        goto check2 linking r1
+        pop r3 off stack r5
+        pop r4 off stack r5
+        r4 := r4 + r3
+        push r4 on stack r5
+        goto waiting
+
+    # Performs subtraction of the first two numbers in the value stack. 
+    # subtracts the top number of the stack from the number below it
+    # r4 and r3 hold these two numbers. 
+    # r4 holds the result of (r4 - r3)
+    sub:
+        goto check2 linking r1
+        pop r3 off stack r5
+        pop r4 off stack r5
+        r4 := r4 - r3
+        push r4 on stack r5
+        goto waiting
+
+    # Performs multiplication of the top two numbers in the value stack
+    # r3 and r4 hold the numbers to multiply
+    # r4 holds the result of the multiplication
+    mul:
+        goto check2 linking r1
+        pop r3 off stack r5
+        pop r4 off stack r5
+        r4 := r4 * r3
+        push r4 on stack r5
+        goto waiting
+
+    # Performs signed division where the top number of the value stack is
+    # the divisor and the next number below is the dividend. Pushes the
+    # result onto the value stack
+    # r3 holds the divisor; r4 holds the dividend
+    div:
+        goto check2 linking r1
+        pop r3 off stack r5
+        if (r3 == r0) goto div0 using r1
+        if (r3 <s 0) goto checkSecondFirstNeg using r1
+        
+        pop r4 off stack r5
+        if (r4 <s 0) goto secondNeg using r1
+
+        # Both divisor and dividend are positive, so perform normal divison
+        # +/+ case
+        r4 := r4 / r3
+        goto endDiv
+        
+        # if divisor in r3 is negative, check if the dividend in r4 is
+        # negative. This label checks for a -/- case and handles the
+        # +/- case
+        checkSecondFirstNeg:
+            pop r4 off stack r5
+            if (r4 <s 0) goto bothNeg using r1
+            r3 := r3 * -1
+            r4 := r4 / r3
+            r4 := r4 * -1
+            goto endDiv
+            
+        # If only the dividend on the stack is negative
+        # -/+ case
+        secondNeg:
+            r4 := r4 * -1
+            r4 := r4 / r3
+            r4 := r4 * -1
+            goto endDiv
+
+        # if both divisor and dividend are negative
+        # -/- case
+        bothNeg:
+            r3 := r3 * -1
+            r4 := r4 * -1
+            r4 := r4 / r3
+            goto endDiv
+            
+
+        # error case for dividing by 0
+        # n/0 case
+        div0:
+            output "Division by zero\n"
+            push r3 on stack r5
+            goto waiting
+            
+        # Put value back on the value stack and return to waiting
+        endDiv:
+            push r4 on stack r5
+            goto waiting
+        
+    
+    
+    # Performs bitwise 'or' on top two numbers in value stack
+    # r3 and r4 hold the numbers that bitwise 'or' is performed on
+    # r4 holds the result of bitwise 'or'
+    or:
+        goto check2 linking r1
+        pop r3 off stack r5
+        pop r4 off stack r5
+        r4 := r4 | r3
+        push r4 on stack r5
+        goto waiting
+
+    # Performs bitwise 'and' on the top two numbers of value stack
+    # r3 and r4 hold the numbers that bitwise 'and' is performed on
+    # r4 holds the result of bitwise 'and'
+    and:
+        goto check2 linking r1
+        pop r3 off stack r5
+        pop r4 off stack r5
+        r4 := r4 & r3
+        push r4 on stack r5
+        goto waiting
+
+    # Reverse the sign of the top number on the value stack
+    # r3 holds the number whose sign gets reversed
+    sign:
+        goto check1 linking r1
+        pop r3 off stack r5
+        r3 := r3 * -1
+        push r3 on stack r5
+        goto waiting
+
+    # Perform bitwise complement of top number in value stack
+    # r3 holds the number that gets transformed into bitwise complement
+    not:
+        goto check1 linking r1
+        pop r3 off stack r5
+        r3 := ~r3
+        push r3 on stack r5
+        goto waiting
+
+    # Swaps top two values on value stack
+    # r3 and r4 hold values to be swapped
+    swap:
+        goto check2 linking r1
+        pop r3 off stack r5
+        pop r4 off stack r5
+        push r3 on stack r5
+        push r4 on stack r5
+        goto waiting
+
+    # Duplicates the top value of the value stack
+    # r3 holds the value to be duplicated
+    dup:
+        goto check1 linking r1
+        pop r3 off stack r5
+        push r3 on stack r5
+        push r3 on stack r5
+        goto waiting
+
+    # Pops one value off the value stack
+    pop1:
+        goto check1 linking r1
+        pop stack r5
+        goto waiting
+
+    # Pops all values off the value stack
+    # r3 used as temporary
+    zero:
+        zeroLoop:
+            if (r5 == endvalstack) goto waiting using r3
+            pop stack r5
+            goto zeroLoop
+
+    # Read in a number as input and go to a corresponding
+    # label to perform the command that number indicates
+    # r1 holds input value; r3 holds address of label to jump to
+    waiting:
+            r1 := input()
+            
+        waiting_with_char:
+            # EOF check
+            if (r1 == -1) goto endprogram using r3
+            r3 := jumptable + r1
+            r3 := m[r0][r3]
+            goto r3 
+
+
+    # Entering state stores input in r1 and checks whether r1 contains a digit
+    # if r1 contains a digit 'S' it pops a digit 'D' off the value stack and 
+    # pushes digit (D * 10) + S onto the stack. Non-digits in r1 
+    # perform a command and go to waiting state
+    entering:
+        r1 := input()
+        if (r1 <s 48) goto waiting_with_char using r4
+        if (r1 >=s 58) goto waiting_with_char using r4
+
+        pop r3 off stack r5 
+        r3 := r3 * 10
+        r1 := r1 - 48
+        r3 := r3 + r1
+        push r3 on stack r5
+        goto entering
+
+    # Preserves registers r3 and r4, and goes to the address stored in r1.
+    endprogram:
+        pop r3 off stack r2
+        pop r4 off stack r2
+        pop r1 off stack r2
+        goto r1
+
+    # using the stack pointer in r5. Check1 asserts that there is
+    # 1 element on the value stack. If it fails, it outputs an error message
+    # and goes to the waiting state
+    check1:
+        push r1 on stack r2
+        push r4 on stack r2
+        push r3 on stack r2
+        
+        if (r5 == endvalstack) goto check1error using r3
+        
+        # Preserve registers r3 and r4, then go to the address stored in r1.
+        pop r3 off stack r2
+        pop r4 off stack r2
+        pop r1 off stack r2
+        goto r1
+        
+        check1error:
+            output "Stack underflow---expected at least 1 element\n"
+            pop r3 off stack r2
+            pop r4 off stack r2
+            pop r1 off stack r2
+            goto waiting
+
+
+    # using the stack pointer in r5. Check2 asserts that there are
+    # 2 elements on the stack. If it fails, it outputs an error message
+    # and goes to the waiting state
+    check2:
+        push r1 on stack r2
+        push r4 on stack r2
+        push r3 on stack r2
+    
+        r4 := 0
+        check2loop:
+            r1 := r5 + r4
+            if (r1 == endvalstack) goto check2error using r3
+            if (r4 == 1) goto endcheck2 using r3
+            r4 := r4 + 1
+            goto check2loop
+
+        check2error:
+            output "Stack underflow---expected at least 2 elements\n"
+            pop r3 off stack r2
+            pop r4 off stack r2
+            pop r1 off stack r2
+            goto waiting
+
+        # Preserve registers r3 and r4, then go to the address stored in r1.
+        endcheck2:
+            pop r3 off stack r2
+            pop r4 off stack r2
+            pop r1 off stack r2
+            goto r1
+

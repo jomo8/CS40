@@ -1,0 +1,42 @@
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#                                                                     #
+# Authors: Theodore Schneider (tschne02) and Joey Montalto (jmonta04) #
+#                                                                     #
+# Purpose:  allocate space for the call and value stack               #
+#           (in the data section) and initialize both stack           #
+#           pointers and register 0 (in the  init section).           #
+#                                                                     #
+# Conventions:                                                        #
+#       r0 stores 0                                                   #
+#       r6 and r7 are temporaries                                     #
+#       r2 holds the endstack pointer (call stack)                    #
+#       r5 holds the endvalstack pointer (value stack)                #
+#                                                                     #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+
+
+
+# Initialize space for both call and value stacks
+.section init
+    r0 := 0
+    .temps r6, r7
+
+.section data
+    # Space for call stack
+    .space 10000
+        endstack:
+        
+.section init
+    r2 := endstack
+
+.section data
+    #Space for value stack
+    .space 100000
+        endvalstack:
+  
+.section init 
+    r5 := endvalstack
+
+
+

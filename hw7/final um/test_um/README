@@ -1,0 +1,11 @@
+Joseph Montalto (jmonta04)
+
+A special thank you to the TAs for help. Shout out to Tina.
+
+The routine that takes the most time is the data structure built with Hanson's
+Seq_T struct. This can be improved upon by replacing the Seq_T data structures 
+with c-arrays. Besides this factor, the code does not contain any more notable 
+areas that can be optimized.
+
+I spent 5 hours analyzing the problems posed in the assignment 
+and 40 hours solving the problems after my analysis.

@@ -1,0 +1,72 @@
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#                                                                     #
+# Authors: Theodore Schneider (tschne02) and Joey Montalto (jmonta04) #
+#                                                                     #
+# Purpose: Contains implementaton for the printing all values within  #
+#          a given stack.                                             #
+#                                                                     #
+# Conventions:                                                        #
+#     r0 contains 0                                                   #
+#     r1 used for return adressed                                     #
+#     r6, r7 used as temporaries                                      #
+#     r2 used for call stack pointer                                  #
+#     r5 used for value stack pointer                                 #
+#     r3, r4 a preserved through functions                            #
+#                                                                     #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+.section init
+    .zero r0
+    .temps r6, r7
+    r0 := 0
+
+
+.section text 
+    # assuming that the number to print is on top of the call stack,
+    # printd prints the number stored in decimal format
+    # note that r2 is the call stack pointer
+    printd:
+        push r1 on stack r2  # save return address
+        push r4 on stack r2
+        push r3 on stack r2
+
+        r3 := m[r0][r2 + 3] # get number to print off call stack
+
+        r4 := 0x80000000
+        if (r3 == r4) goto maxNeg_case using r1
+         
+        if (r3 <s 0) goto negOutput_case using r1 # check if number is neg
+
+        r4 := r3 mod 10 # get remainder
+        r3 := r3 / 10   # gets rest of number
+        
+        if (r3 == 0) goto base_case
+
+        push r3 on stack r2 # push n / 10 onto stack
+        goto printd linking r1  # make recursive call
+        
+        r4 := r4 + '0'            
+        output r4               # print the remainder
+        goto finish_printd
+        
+    maxNeg_case:
+        output "-2147483648"
+        goto finish_printd
+
+    negOutput_case:
+        output "-"
+        r4 := r3 * -1
+        push r4 on stack r2
+        goto printd linking r1
+        goto finish_printd
+
+    base_case:
+        r3 := r4 + '0'
+        output r3
+
+    finish_printd: 
+        pop r3 off stack r2 
+        pop r4 off stack r2   
+        pop r1 off stack r2 # put return address in r1
+        pop stack r2
+        goto r1

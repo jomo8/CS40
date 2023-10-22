@@ -1,0 +1,21 @@
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#                                                                     #
+# Authors: Theodore Schneider (tschne02) and Joey Montalto (jmonta04) #
+#                                                                     #
+# Purpose: Contains the call to main, which is the RPN Program        #
+#                                                                     #
+# Conventions:                                                        #
+#       r0 contains 0                                                 #
+#       r1 is used for the return addresses                           #
+#       r6 and r7 are temporary registers                             #
+#                                                                     #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+.section init
+    .zero r0
+    .temps r6, r7
+
+    # Makes the initial call to main, then halts after main returns
+    start:
+      goto main linking r1
+      halt
