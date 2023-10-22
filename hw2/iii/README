@@ -1,0 +1,145 @@
+/****************************************************************************
+* Homework 2: iii
+* Alec Plano (aplano01a)
+* Joseph Montalto (jmonta04)
+* CS 40
+* README
+****************************************************************************/
+
+Compile/run:
+        - Compile using
+               make sudoku
+               make unblackedges
+        - Run executable for respective programs with any of these methods
+            Sudoku
+                ./sudoku inputFile
+                ./sudoku < inputFile
+            Unblackedges
+                ./unblackedges inputFile
+                ./unblackedges < inputFile
+
+Program Purpose:
+  The program creates two data structures: a 2D unboxed array (UArray2_T) 
+  and a 2D array that solely stores bits (Bit2_T). Using our UArray2_T,
+  our program checks whether, or not, a sudoku board is correct, returning 0
+  when correct and 1 otherwise. Using the Bit2_T, our program unblackedges
+  removes any blackspace on the outer edge of pbm images.
+
+Acknowledgements:
+  We would like to thank all the cs40 TAs who have helped us so much on this
+  homework. A special thanks goes to Alec, Josh, Dan, Asli, Trevor and Lexi.
+
+Correctness:
+  In this assignment we successfuly implemented four things. Firstly, we
+  implemented a class for 2D unboxed arrays (UArray2_T) using Hanson's 
+  UArray_T data structures. Secondly, we used our UArray2_T class to create a
+  program that checks the correctness of a sudoku board when inputted as a
+  portable graymap file. 
+    Then, we created a class for 2D bit arrays (Bit2_T)
+    using Hanson's Bit_T data structure. Using our Bit2_T class, we created a
+    program that removes the black edges from a pbm image.
+      Each program passes performs their intended purposes as expected and 
+      does not contain any known bugs. 
+
+
+Files:
+README:
+  The README file contains all relavant information for this
+  project including how to compile and run this program.
+bit2.h: 
+  Function header for Bit2_T. This creates a 2D array of bits data structure.
+  It has functions that perform the needed operations in order to create and
+  manipulate the elements within the array.
+
+bit2.c:
+  Function definition for Bit2_T. Contains the functions that creates the
+  array; puts values into the array; gets values at given indices; and 
+  returns values of the width, height, and number of 1s in the array.
+
+unblackedges.c:
+  A program that replaces the black edges of a pbm image with whitespace. The
+  resulting image is printed to stdout.
+
+uarray2.h:
+  Function header for UArray2_T. This creates a 2D array of elements of
+  a known size. It has functions that perform the needed operations in
+  order to create and manipulate the elements within the array.
+  
+uarray2.c:
+  Function definition for UArray2_T. This file contains functions that
+  creates the array; accesses values in the array; also that return the
+  width, height and element size.
+
+sudoku.c:
+  A program that determines if a provided sudoku board as a pgm is a
+  valid solution or not. If the board is a valid solution then the
+  program returns 0. If the board is an invalid solution then the 
+  program returns 1.
+
+Time:
+        We spent 40 hours on this homework assignment.
+
+Testing:
+Testing our classes
+
+Testing Uarray
+        ./correct_useuarray2 > correct_useuarray2.txt
+        valgrind ./my_useuarray2 > my_useuarray2.txt
+        diff correct_useuarray2.txt my_useuarray2.txt
+ran following commands and there was no output indicating our class worked
+as expected and valgrind verified we had no memory leaks.
+
+Testing Bit2
+        ./correct_usebit2 > correctusebit2.txt
+        valgrind ./my_usebit2 > myusebit2.txt
+        diff correctusebit2.txt myusebit2.txt
+ran the following commands and there was no output indicating the class
+worked as expected and valgrind verified there was no memory leaks.
+
+Testing Sudoku
+        cat sudokuTest1.pgm | ./sudoku
+        echo $?
+We ran the following commands to test our sudoku code. sudokuTest1.pgm
+represents a valid sudoku puzzle given to us in the spec. The result of
+the commands was a 0 to the terminal telling us that the code worked as
+expected.
+
+        valgrind ./sudoku sudokuTest2.pgm
+        echo $?
+These commands tested the ability to get files from the command line as
+well as tested for memory leak. This test ran successfully indicating that
+our program worked with no memory leaks.
+
+        valgrind ./sudoku < sudokuTest3.pgm
+        echo $?
+These commands checked to ensure our program worked correctly for a test
+board that we knew was not valid. once again there were no valgrind errors
+and the value printed to the terminal was 1 as expected.
+
+        valgrind ./sudoku < sudokuTest4.pgm
+This command tested that our code operated as expected when a file that was
+non existent was passed to the program.
+
+Testing unblackedges
+
+        ./unblackedges test1.pbm > test11.pbm
+        diff test11.pbm answer1.pbm
+
+        ./unblackedges hyphen.pbm > hyphenTest1.pbm
+        ./unblackedges < hyphen.pnm > hyphenTest2.pbm
+        pngtopnm /comp/40/bin/images/bitonal/hyphen.png 
+                                        | ./unblackedges > hyphenTest3.pbm
+        diff hyphenTest1.pbm hyphenTest2.pbm
+        diff hyphenTest1.pbm hyphenTest3.pbm
+Running these tests we verified that the three methods of input all worked
+and gave identical outputs as expected. Furthur analysis illstrated that
+we were infact removing all the blackend edges and leaving in all the
+character in the center of the image.
+
+       pngtopnm /comp/40/bin/images/bitonal/shakespeare.png 
+                                | valgrind ./unblackedges > shakespeareTest.pbm 
+This command tested another image to verify that the code was working
+properly. It also ensured that we had no memory leaks in our program.
+
+Note: unblackedges took on average a couple of seconds(about 10-20) when ran,
+however when ran with valgrinds it took much longer.

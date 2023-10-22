@@ -1,0 +1,113 @@
+/****************************************************************************
+* Homework 3: Locality and the costs of loads and stores
+* Sam Reed (sreed07)
+* Joseph Montalto (jmonta04)
+* CS 40
+* README
+****************************************************************************/
+
+Compile/run: 
+        -Compile using
+                make ppmtrans
+        -Run executable using
+                ./ppmtrans [-rotate <angle>] 
+                [-{row,col,block}-major] [-time <file name>] [filename]
+
+Program Purpose:
+        The program creates a UArray2b that contains UArray2 elements that
+        represent blocks of elements within the image. Using this data 
+        structure, our program rotates the image 90°, 180°, or 270° as per
+        user input. The program also offers the option to transpose and flip 
+        horizontally or vertically. Users are also given the option to perform
+        the given operation in row-major, column-major, or block-major order,
+        each with varying efficiencies.
+
+Acknowledgements:
+        We would like to thank all the CS40 TAs who have helped us so much on
+        this homework. A special thanks goes to Alan, Lexi, Eric, and Rohun.
+
+Correctness:
+        In this assignment, we successfully implemented three things. First,
+        we created a UArray2b that represents blocks of elements. We
+        used the provided UArray2 implementation to represent individual
+        elements of the UArray2b. 
+        Then, we implemented the a2plain and a2blocked classes that 
+        respectively create create UArray2 as representations of elements or 
+        blocks and return information about the arrays or perform mapping 
+        functions with various characteristics.
+        Finally, we implemented the ppmtrans class that: reads in commands from
+        the user and performs the given operations, whether it's rotation or 
+        element access methods; reads the image and performs the given
+        operations on the image; and returns the output to the needed output
+        file or stdout. 
+
+Architecture:
+        Our implementation relies on a 2D array implementation. We use a
+        UArray2b that contains UArray2 elements at each index. Each UArray2
+        represents a block of the image, and the 2D UArray within UArray2 
+        represents individual elements (pixels) of the image file. Thus, the
+        UArray2b represents the entire image, each UArray2 are blocked 
+        elements, and each UArray are the elements within.
+
+Performance:
+Large Image (mobo.ppm) Pixel amount: 49,939,200: 
+[map type],    [rotation],    [total time (ns)],    [time per pixel (ns/px) = Operations per pixel]
+row-major,      Rotate 0:        111373.000000,                      0.0022301719
+col-major,      Rotate 0:        91426.000000,                       0.0018307462
+block-major,    Rotate 0:        121203.000000,                      0.0024270112 
+
+row-major,      Rotate 90:      5650006281.000000,                   113.13770106
+col-major,      Rotate 90:      5718468140.000000,                   114.508605264
+block-major,    Rotate 90:      5791439927.000000,                   115.969817838 
+
+row-major,      Rotate 180:     3352452227.000000,                   67.1306754413
+col-major,      Rotate 180:     3339629915.000000,                   66.8739169831
+block-major,    Rotate 180:     5514776657.000000,                   110.429815796
+
+row-major,      Rotate 270:     5701265550.000000,                   114.164134588
+col-major,      Rotate 270:     5643006473.000000,                   112.997534462
+block-major,    Rotate 270:     5545813538.000000,                   111.0513092
+
+
+Small Image (flowers.ppm) Pixel amount: 18,180:
+row-major,      Rotate 90:       1252120.000000,                     68.87348735
+col-major,      Rotate 90:       1560234.000000,                     85.82145215
+block-major,    Rotate 90:       2163903.000000,                     119.0265677
+
+row-major,      Rotate 180:      1293347.000000,                     71.1411991199
+col-major,      Rotate 180:      1292513.000000,                     71.0953245325
+block-major,    Rotate 180:      2195758.000000,                     120.778767877
+
+CPU Test were run on: 
+        Model      : 85
+        Name       : Tufts Servers
+        Clock Rate : 2194.843 
+        CPU Type   : Intel(R) Xeon(R) Silver 4214Y CPU @ 2.20GHz  
+
+Analysis:  
+
+First off, we noticed that zero rotation was extremely fast.  
+        This is becuase it is not actually moving any pixels around, leading 
+        to a fraction of an instruction per pixel as nothing was being done.
+Next, for the larger image, it suprised us how similar row, column, and block 
+        were for each rotation.  We had predicted that block major would be 
+        faster for all of these, as there are more cache hits.  We think the 
+        results we got are due to the fact that UArray2b has a more complex 
+        layered implementation than UArray2.  Our UArray2b stores UArrays in 
+        a UArray2, leading to more instructions for functions like map and at 
+        than just using UArray2. So while it makes up some time in more cache 
+        hits, it is slowed down by the number of instructions.
+We also noticed that the instruction per pixel was noticeably faster for the 
+        smaller image in a 90 rotation; however, the instruction time seemed 
+        similar for a 180 rotation.  We think this is due to the fact that a 
+        180 degree shift moves pixels either row-to-row or col-to-col, meaning 
+        that these can be kept in cache more often, whereas 90 and 270 force 
+        both rows and columns to be in cache and kick eachother out.
+We found it interesting that the rotate 180 function actually took longer per
+        pixel in the smaller image than in the larger image.  We think that 
+        this must be due to the time it takes to start and free the rotations.
+        With more pixels, this amount is averaged out between them, where in 
+        the smaller image it takes more of a toll.
+
+Hours Spent:
+        We spent 25 hours on this assignment.
