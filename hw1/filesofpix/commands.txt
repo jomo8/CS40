@@ -1,0 +1,12 @@
+./restoration alum-corrupt.pgm > output0.pgm
+./restoration bigboi-corrupt.pgm > output1.pgm
+./restoration boston-corrupt.pgm > output2.pgm
+./restoration campus-corrupt.pgm > output3.pgm
+./restoration computer-corrupt.pgm > output4.pgm
+./restoration elephant-corrupt.pgm > output5.pgm
+./restoration < jumbos-corrupt.pgm > output6.pgm
+./restoration < logo-corrupt.pgm > output7.pgm
+./restoration < professor-corrupt.pgm > output8.pgm
+./restoration < sail-corrupt.pgm > output9.pgm
+./restoration < ta-corrupt.pgm > output10.pgm
+./restoration < turing-corrupt.pgm > output11.pgm

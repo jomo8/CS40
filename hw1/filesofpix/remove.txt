@@ -1,0 +1,12 @@
+rm output0.pgm
+rm output1.pgm
+rm output2.pgm
+rm output3.pgm
+rm output4.pgm
+rm output5.pgm
+rm output6.pgm
+rm output7.pgm
+rm output8.pgm
+rm output9.pgm
+rm output10.pgm
+rm output11.pgm

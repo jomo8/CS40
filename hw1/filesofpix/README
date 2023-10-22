@@ -1,0 +1,114 @@
+/****************************************************************************
+* Homework 1: filesofpix
+* Joseph Montalto (jmonta04)
+* Alec Plano (aplano01a)
+* CS 40
+* README
+****************************************************************************/
+
+Compile/run:
+        - Compile using
+               make restoration
+        - Run executable with any of these methods
+            ./restoration inputFile
+            ./restoration < inputFile
+
+            NOTE:cat inputFile | ./restoration(this does not work despite it 
+                                              being functionally the same as
+                                              the second command listed above)
+
+Program Purpose:
+  Given a corrupted "plain" PGM file that follows the corrupted structure 
+  given in the spec, this restoration program can remove injected lines and 
+  non-integer characters in between each desired interger values; thus 
+  creating an uncorrupted "raw" PGM output file.
+
+Acknowledgements:
+  We would like to thank all the cs40 TAs who have helped us so much on this
+  homework. A special thanks goes to Alec, Josh, Dan, Asli, Trevor and Lexi.
+
+Correctness:
+  In this assignment we successfuly implemented two things. Firstly
+  is the readaline.c file and secondly is the restoration.c file.
+  The readaline.c file is the .c companion file for the provided 
+  readaline.h. The goal of this file was to simulates the implementation 
+  and interface methodolgy we discussed in class. We developed the
+  function in readaline.c with the implementation mindset. This
+  means that the readaline.c and readaline.h files are indifferent
+  to the users intentions. This code simply mallocs space on the 
+  heap and reads in a single line from an input file stream and 
+  stores it in the allocated heap memory.
+    The restoration.c file uses the interface methodolgy discussed in
+    class using the funcitonality of readaline to then decorrupt the 
+    corrupted image files.
+
+Files:
+README:
+  The README file contains all relavant information for this
+  project including how to compile and run this program.
+readaline.c:
+  This is the implementation file for the readaline.h file provided
+  by the instructors. The single readaline function included takes an 
+  input file stream and a double pointer to a character (a pointer to a
+  c string). The function allocates memory on the heap for a single line
+  and copies that line into the allocated heap memory. The function then
+  returns the size of that line as well as a second value through
+  the pointer parameter for the actual chars themselves. It is the job of the
+  client using the interface to free this memory.
+    Our readaline function works for any length line ending with
+    either a new line character or an EOF character. It also works for
+    empty files or lines without any characters in which case it returns 0.
+
+restoration.c:
+  The restoration.c file contains the main program for restoring corrupted
+  image files. It utilizes three of Hanson's data structures; the
+  Atom, the Table and the Sequence. This program also uses the custom
+  implementation of readaline which we discussed above. To compile and
+  run this executable follow the instruction at the top in the 
+  compile/run section of the readme.
+
+Time:
+        We spent 52 hours on this homework assignment.
+
+Notes about special functions:
+  The sortaline funtion within restoration.c may be a little
+  intimidating at first sight but the algorithm is quite straightforward.
+  We therefore thought it may be useful to describe the function in a
+  little detail so any future user of this code will readily understand
+  it. Like readaline it starts by parsing through the array of characters
+  and determines how many characters and numbers there are. Note that a
+  number consists of a string of digets not the number of individual
+  digets. It then allocates enough space in heap memory for each of these
+  strings. When a character is sceen it adds it to the character list.
+  when a digit is found it is added to the list using the following 
+  algorithm,
+        Number stored = Number stored * 10 + digit
+  this is reflected in the code with the following lines
+        d->int_str[int_itr-1] *= 10;
+        d->int_str[int_itr-1] += ((*datapp)[i]) - '0';
+
+Testing:
+    We implemented the tried and true method of "write a little test a
+    little" while we were writing our program. We began by writing our
+    readaline function and testing it on various cases including edge cases
+    of ending on EOF instead of a newline as well as an empty file. We then
+    wrote our sortaline function testing its funcitonality with similar
+    test cases to readaline only printing our the sorted arrays rather than
+    the entire line unsorted. gradually we added the table and sequence
+    data structures until we had what felt like a coherent program. At this
+    point we were interested in testing in images, however the corrupted
+    images provided were much to large to make any sense of when we got
+    errors. We created a tinyTest input file as well as a mediumTest
+    input file. Testing on these files made it much clearer what our errors
+    were, enabling us to ammend them swiftly. Finally when our program
+    functioned as expected on tinyTest and mediumTest we ran it on the
+    larger provided corrupted images. We then found errors that resulted
+    in using the bigger data set. This problem was a result of using fprintf
+    with a string. Although we manually put in the end of string character \0
+    after every line the computer didnt seam to like that and would result in
+    images that were shifted at certain points. The fix we came up with was to
+    use a double for loop and manually write every character(representing a
+    value between 0-255) into the output file(stdout).
+    Of course no testing would be complete without our friend valgrinds.
+    Valgrinds came in very handy when we were double freeing a single value
+    which was stored in both the table and the sequence.

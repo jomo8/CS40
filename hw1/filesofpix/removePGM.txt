@@ -1,0 +1,12 @@
+rm alum-corrupt.pgm
+rm bigboi-corrupt.pgm
+rm boston-corrupt.pgm
+rm campus-corrupt.pgm
+rm computer-corrupt.pgm
+rm elephant-corrupt.pgm
+rm jumbos-corrupt.pgm
+rm logo-corrupt.pgm
+rm professor-corrupt.pgm
+rm sail-corrupt.pgm
+rm ta-corrupt.pgm
+rm turing-corrupt.pgm
